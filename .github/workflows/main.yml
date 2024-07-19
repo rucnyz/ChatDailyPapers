@@ -25,6 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install arxiv
         pip install pytz
+        pip install tqdm
 
     - name: Run email script
       env:
