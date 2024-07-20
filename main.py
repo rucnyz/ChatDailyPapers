@@ -19,7 +19,7 @@ def main():
     search = arxiv.Search(
         query = "cat:cs.CL OR cat:cs.AI OR cat:cs.LG OR cat:cs.CR OR cat:cs.SE",
         max_results = 1000,
-        sort_by = arxiv.SortCriterion.SubmittedDate,
+        sort_by = arxiv.SortCriterion.LastUpdatedDate,
         sort_order = arxiv.SortOrder.Descending
     )
     filtered_papers = []
