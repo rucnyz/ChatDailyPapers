@@ -54,6 +54,14 @@ def main():
                 "abstract": result.summary,
                 "url": result.entry_id
             })
+        # agent
+        elif (("poison" in abstract or "attack" in abstract or "red teaming" in abstract or "red-teaming" in abstract)
+              and "agent" in title):
+            filtered_papers.append({
+                "title": result.title,
+                "abstract": result.summary,
+                "url": result.entry_id
+            })
     email_content = "Here are the filtered papers:\n\n"
     for paper in filtered_papers:
         email_content += f"Title: {paper['title']}\n"
