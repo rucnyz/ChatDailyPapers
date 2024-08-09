@@ -21,8 +21,48 @@ def main():
         sort_by = arxiv.SortCriterion.LastUpdatedDate,
         sort_order = arxiv.SortOrder.Descending
     )
-    filtered_papers = []
     search_results = arxiv.Client().results(search)
+    filtered_papers = []
+    for i in range(20):
+        try:
+            filtered_papers = filter_papers(filter_times_span, search_results)
+        except Exception as _:
+            pass
+        if len(filtered_papers) != 0:
+            break
+        time.sleep(60)
+    email_content = "Here are the filtered papers:\n\n"
+    for paper in filtered_papers:
+        email_content += f"Title: {paper['title']}\n"
+        email_content += f"Abstract: {paper['abstract']}\n"
+        email_content += f"URL: {paper['url']}\n\n"
+    # 配置邮件信息
+    sender_email = "rucnyz@gmail.com"
+    receiver_email = "rucnyz@gmail.com"
+    subject = "Filtered ArXiv Papers"
+
+    # 创建MIMEText对象
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(email_content, 'plain'))
+
+    # 发送邮件
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail的SMTP服务器和端口
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+
+def filter_papers(filter_times_span, search_results):
+    filtered_papers = []
     for result in tqdm(search_results, total = 1000):
         if result.updated < filter_times_span[0]:
             break
@@ -61,34 +101,7 @@ def main():
                 "abstract": result.summary,
                 "url": result.entry_id
             })
-    email_content = "Here are the filtered papers:\n\n"
-    for paper in filtered_papers:
-        email_content += f"Title: {paper['title']}\n"
-        email_content += f"Abstract: {paper['abstract']}\n"
-        email_content += f"URL: {paper['url']}\n\n"
-    # 配置邮件信息
-    sender_email = "rucnyz@gmail.com"
-    receiver_email = "rucnyz@gmail.com"
-    subject = "Filtered ArXiv Papers"
-
-    # 创建MIMEText对象
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = receiver_email
-    msg['Subject'] = subject
-
-    msg.attach(MIMEText(email_content, 'plain'))
-
-    # 发送邮件
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail的SMTP服务器和端口
-        server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully!")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    return filtered_papers
 
 
 if __name__ == '__main__':
