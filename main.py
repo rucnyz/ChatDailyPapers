@@ -1,4 +1,3 @@
-import argparse
 import os
 import smtplib
 from datetime import datetime, timedelta
@@ -15,7 +14,7 @@ yesterday = now - timedelta(days = 1.1)
 
 
 def main():
-    filter_times_span = (now - timedelta(days = args.filter_times_span), now)
+    filter_times_span = (yesterday, now)
     search = arxiv.Search(
         query = "cat:cs.CL OR cat:cs.AI OR cat:cs.LG OR cat:cs.CR OR cat:cs.SE",
         max_results = 1000,
@@ -25,8 +24,8 @@ def main():
     filtered_papers = []
     search_results = arxiv.Client().results(search)
     for result in tqdm(search_results, total = 1000):
-        if result.updated < filter_times_span[0] or result.updated > filter_times_span[1]:
-            continue
+        if result.updated < filter_times_span[0]:
+            break
         title = result.title.lower()
         abstract = result.summary.lower()
         # code generation
@@ -93,10 +92,6 @@ def main():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--filter_times_span", type = int, default = 1.1,
-                        help = 'how many days of files to be filtered.')
-    args = parser.parse_args()
     import time
 
     start_time = time.time()
