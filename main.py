@@ -14,7 +14,6 @@ yesterday = now - timedelta(days = 1.1)
 
 
 def main():
-    filter_times_span = (yesterday, now)
     search = arxiv.Search(
         query = "cat:cs.CL OR cat:cs.AI OR cat:cs.LG OR cat:cs.CR OR cat:cs.SE",
         max_results = 1000,
@@ -23,9 +22,9 @@ def main():
     )
     search_results = arxiv.Client().results(search)
     filtered_papers = []
-    for i in range(20):
+    for i in range(10):
         try:
-            filtered_papers = filter_papers(filter_times_span, search_results)
+            filtered_papers = filter_papers(search_results)
         except Exception as _:
             pass
         if len(filtered_papers) != 0:
@@ -61,10 +60,14 @@ def main():
         print(f"Failed to send email: {e}")
 
 
-def filter_papers(filter_times_span, search_results):
+def filter_papers(search_results):
+    filter_times_span = None
     filtered_papers = []
     for result in tqdm(search_results, total = 1000):
-        if result.updated < filter_times_span[0]:
+        if filter_times_span is None:
+            filter_times_max = result.updated
+            filter_times_span = filter_times_max - timedelta(days = 1)
+        if result.updated < filter_times_span:
             break
         title = result.title.lower()
         abstract = result.summary.lower()
